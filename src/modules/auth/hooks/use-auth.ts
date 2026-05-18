@@ -20,62 +20,6 @@ export function useMe() {
   });
 }
 
-// ─── useLogin ─────────────────────────────────────────────────────────────────
-
-// export function useLogin() {
-//   const setAuth = useAuthStore((s) => s.setAuth);
-//   const router = useRouter();
-//   const qc = useQueryClient();
-
-//   return useMutation({
-//     mutationFn: (dto: LoginDto) =>
-//       api.post('auth/login', { json: dto }).json<ApiSuccess<AuthResponse>>(),
-
-//     onSuccess: (res) => {
-//       const { user, tokens } = res.data;
-//       setAuth({ id: user.id, email: user.email }, tokens);
-//       qc.invalidateQueries({ queryKey: queryKeys.auth.me });
-//       toast.success('Welcome back!', user.email);
-//       router.push('/feed');
-//     },
-
-//     // onError: async (err) => {
-//     //   throw new Error(await getApiError(err));
-//     // },
-//     onError: async (err) => {
-//       const message = await getApiError(err);
-//       toast.error('Login failed', message);
-//     },
-//   });
-// }
-
-// ─── useRegister ──────────────────────────────────────────────────────────────
-
-// export function useRegister() {
-//   const setAuth = useAuthStore((s) => s.setAuth);
-//   const router = useRouter();
-//   const qc = useQueryClient();
-
-//   return useMutation({
-//     mutationFn: (dto: RegisterDto) =>
-//       api.post('auth/register', { json: dto }).json<ApiSuccess<AuthResponse>>(),
-
-//     onSuccess: (res) => {
-//       const { user, tokens } = res.data;
-//       setAuth({ id: user.id, email: user.email }, tokens);
-//       qc.invalidateQueries({ queryKey: queryKeys.auth.me });
-//       toast.success('Account created!', `Welcome, ${user.name ?? user.email}`);
-//       router.push('/feed');
-//     },
-
-//     onError: async (err) => {
-//       const message = await getApiError(err);
-//       toast.error('Registration failed', message);
-//     },
-//   });
-// }
-// use-auth.ts
-
 export function useLogin() {
   const setAuth = useAuthStore((s) => s.setAuth);
   const router = useRouter();
@@ -91,6 +35,11 @@ export function useLogin() {
       qc.invalidateQueries({ queryKey: queryKeys.auth.me });
       toast.success('Welcome back!', user.email);
       router.push('/feed');
+    },
+
+    onError: async (err) => {
+      const message = await getApiError(err);
+      toast.error('Login failed', message);
     },
   });
 }
@@ -110,6 +59,11 @@ export function useRegister() {
       qc.invalidateQueries({ queryKey: queryKeys.auth.me });
       toast.success('Account created!', `Welcome, ${user.name ?? user.email}`);
       router.push('/feed');
+    },
+
+    onError: async (err) => {
+      const message = await getApiError(err);
+      toast.error('Registration failed', message);
     },
   });
 }

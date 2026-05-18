@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { Route } from 'next';
 import { usePathname } from 'next/navigation';
 import { Home, Search, User, PenSquare } from 'lucide-react';
 import { useState } from 'react';
@@ -9,13 +10,13 @@ import { useAuthStore } from '@/modules/auth/store';
 import { CreatePostForm } from '@/modules/posts/components/create-post-form';
 
 const navItems = [
-  { href: '/feed',   icon: Home,   label: 'Feed' },
-  { href: '/search', icon: Search, label: 'Explore' },
+  { href: '/feed' as Route, icon: Home, label: 'Feed' },
+  { href: '/search' as Route, icon: Search, label: 'Explore' },
 ];
 
 export function MobileNav() {
   const pathname = usePathname();
-  const user     = useAuthStore((s) => s.user);
+  const user = useAuthStore((s) => s.user);
   const [compose, setCompose] = useState(false);
 
   return (

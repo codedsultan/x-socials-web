@@ -7,25 +7,25 @@ import { z } from 'zod';
 import { X } from 'lucide-react';
 import { Input, Textarea } from '@/shared/components/ui/input';
 import { Button } from '@/shared/components/ui/button';
-import { Badge } from '@/shared/components/ui/primitives';
+// import { Badge } from '@/shared/components/ui/primitives';
 import { useUpdatePost } from '../hooks/use-posts';
 import { toast } from '@/shared/components/ui/toast';
 import type { Post } from '@/shared/types/api';
 
 const schema = z.object({
-  title:   z.string().min(3).max(200),
+  title: z.string().min(3).max(200),
   content: z.string().min(1).max(10_000),
 });
 
 type FormValues = z.infer<typeof schema>;
 
 interface EditPostModalProps {
-  post:      Post;
-  onClose:   () => void;
+  post: Post;
+  onClose: () => void;
 }
 
 export function EditPostModal({ post, onClose }: EditPostModalProps) {
-  const [tags, setTags]       = useState<string[]>(post.tags);
+  const [tags, setTags] = useState<string[]>(post.tags);
   const [tagInput, setTagInput] = useState('');
   const updatePost = useUpdatePost(post.id);
 

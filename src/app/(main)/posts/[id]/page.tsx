@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Heart } from 'lucide-react';
 import { Avatar, Spinner, EmptyState, Badge } from '@/shared/components/ui/primitives';
-import { Button } from '@/shared/components/ui/button';
+// import { Button } from '@/shared/components/ui/button';
 import { CommentThread } from '@/modules/comments/components/comment-thread';
 import { usePost } from '@/modules/posts/hooks/use-posts';
 import { usePostAuthor } from '@/modules/users/hooks/use-post-author';
@@ -15,15 +15,15 @@ import { toast } from '@/shared/components/ui/toast';
 import { timeAgo, compactNumber, cn } from '@/shared/lib/utils';
 
 export default function PostPage() {
-  const { id }    = useParams<{ id: string }>();
-  const isAuthed  = useAuthStore((s) => s.isAuthed());
+  const { id } = useParams<{ id: string }>();
+  const isAuthed = useAuthStore((s) => s.isAuthed());
 
   const { data: post, isLoading, isError } = usePost(id);
-  const author     = usePostAuthor(post?.authorId ?? '');
+  const author = usePostAuthor(post?.authorId ?? '');
   const toggleLike = useToggleLike();
 
   // Track local liked state — the feed optimistic update doesn't apply here
-  const [liked,      setLiked]      = useState(false);
+  const [liked, setLiked] = useState(false);
   const [likesCount, setLikesCount] = useState<number | null>(null);
 
   // Sync local state once post loads

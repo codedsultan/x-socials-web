@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { Route } from 'next';
 import { usePathname } from 'next/navigation';
 import { Home, Search, User, PenSquare, LogOut, Sun, Moon, Zap } from 'lucide-react';
 import { useTheme } from 'next-themes';
@@ -13,15 +14,15 @@ import { useState } from 'react';
 import { CreatePostForm } from '@/modules/posts/components/create-post-form';
 
 const navItems = [
-  { href: '/feed',   icon: Home,      label: 'Feed' },
-  { href: '/search', icon: Search,    label: 'Explore' },
+  { href: '/feed' as Route, icon: Home, label: 'Feed' },
+  { href: '/search' as Route, icon: Search, label: 'Explore' },
 ];
 
 export function Sidebar() {
-  const pathname    = usePathname();
+  const pathname = usePathname();
   const { theme, setTheme } = useTheme();
-  const user        = useAuthStore((s) => s.user);
-  const logout      = useLogout();
+  const user = useAuthStore((s) => s.user);
+  const logout = useLogout();
   const [compose, setCompose] = useState(false);
 
   return (

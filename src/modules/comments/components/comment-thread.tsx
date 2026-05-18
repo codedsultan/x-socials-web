@@ -22,15 +22,15 @@ type FormValues = z.infer<typeof schema>;
 
 function CommentRow({ comment, postId, depth = 0 }: { comment: Comment; postId: string; depth?: number }) {
   const [showReplyForm, setShowReplyForm] = useState(false);
-  const [showReplies,   setShowReplies]   = useState(false);
-  const myUserId   = useAuthStore((s) => s.user?.id);
-  const isAuthor   = myUserId === comment.authorId;
-  const author     = usePostAuthor(comment.authorId);
+  const [showReplies, setShowReplies] = useState(false);
+  const myUserId = useAuthStore((s) => s.user?.id);
+  const isAuthor = myUserId === comment.authorId;
+  const author = usePostAuthor(comment.authorId);
   const deleteComment = useDeleteComment(postId);
   const createComment = useCreateComment(postId);
-  const repliesQuery  = useReplies(showReplies ? comment.id : '');
+  const repliesQuery = useReplies(showReplies ? comment.id : '');
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<FormValues>({
+  const { register, handleSubmit, reset, formState: { errors: _errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
   });
 

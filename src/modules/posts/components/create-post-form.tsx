@@ -7,11 +7,11 @@ import { z } from 'zod';
 import { X } from 'lucide-react';
 import { Input, Textarea } from '@/shared/components/ui/input';
 import { Button } from '@/shared/components/ui/button';
-import { Badge } from '@/shared/components/ui/primitives';
+// import { Badge } from '@/shared/components/ui/primitives';
 import { useCreatePost } from '../hooks/use-posts';
 
 const schema = z.object({
-  title:   z.string().min(3, 'Title must be at least 3 characters').max(200),
+  title: z.string().min(3, 'Title must be at least 3 characters').max(200),
   content: z.string().min(1, 'Content is required').max(10_000),
 });
 
@@ -22,7 +22,7 @@ interface CreatePostFormProps {
 }
 
 export function CreatePostForm({ onSuccess }: CreatePostFormProps) {
-  const [tags, setTags]       = useState<string[]>([]);
+  const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
   const [apiError, setApiError] = useState('');
 
