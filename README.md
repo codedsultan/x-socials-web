@@ -6,7 +6,7 @@ Next.js 16 frontend for the x-socials API.
 
 | Layer | Library |
 |---|---|
-| Framework | Next.js 15 (App Router) |
+| Framework | Next.js 16 (App Router) |
 | Data fetching | TanStack Query v5 |
 | State | Zustand (auth slice only) |
 | HTTP | ky (with silent token refresh) |
