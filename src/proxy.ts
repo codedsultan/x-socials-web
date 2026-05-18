@@ -10,7 +10,7 @@ import type { NextRequest } from 'next/server';
 const PROTECTED = ['/feed', '/posts', '/users', '/search'];
 const AUTH_ONLY = ['/login', '/register']; // redirect authed users away from these
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Read access token from the cookie set by the auth store's localStorage
