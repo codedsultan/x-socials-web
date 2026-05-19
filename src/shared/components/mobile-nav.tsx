@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { cn } from '@/shared/lib/utils';
 import { useAuthStore } from '@/modules/auth/store';
 import { CreatePostForm } from '@/modules/posts/components/create-post-form';
+import { NotificationBell } from '@/modules/notifications/components/notification-bell';
 
 const navItems = [
   { href: '/feed' as Route, icon: Home, label: 'Feed' },
@@ -67,6 +68,7 @@ export function MobileNav() {
                 <User className="h-5 w-5" />
                 <span className="text-[10px] font-medium">Profile</span>
               </Link>
+
             </>
           ) : (
             <Link
@@ -78,6 +80,8 @@ export function MobileNav() {
               <span className="text-[10px] font-medium">Sign in</span>
             </Link>
           )}
+          {user && <NotificationBell />}
+
         </div>
       </nav>
 

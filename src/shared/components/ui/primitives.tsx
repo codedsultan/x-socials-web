@@ -4,9 +4,9 @@ import { cn, initials, avatarUrl } from '@/shared/lib/utils';
 // ─── Avatar ───────────────────────────────────────────────────────────────────
 
 interface AvatarProps {
-  name?:      string;
-  src?:       string;
-  size?:      'xs' | 'sm' | 'md' | 'lg' | 'xl';
+  name?: string;
+  src?: string;
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
 }
 
@@ -31,8 +31,9 @@ export function Avatar({ name = '', src, size = 'md', className }: AvatarProps) 
         <span className="flex h-full w-full items-center justify-center font-semibold text-white">
           {initials(name)}
         </span>
-      )}
-    </span>
+      )
+      }
+    </span >
   );
 }
 
@@ -68,8 +69,8 @@ export function PostCardSkeleton() {
 // ─── Badge ────────────────────────────────────────────────────────────────────
 
 interface BadgeProps {
-  children:   React.ReactNode;
-  variant?:   'default' | 'brand' | 'success' | 'warning' | 'danger';
+  children: React.ReactNode;
+  variant?: 'default' | 'brand' | 'success' | 'warning' | 'danger';
   className?: string;
 }
 
@@ -78,10 +79,10 @@ export function Badge({ children, variant = 'default', className }: BadgeProps) 
     <span className={cn(
       'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
       variant === 'default' && 'bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300',
-      variant === 'brand'   && 'bg-brand-50  text-brand-700  dark:bg-brand-900/30 dark:text-brand-300',
+      variant === 'brand' && 'bg-brand-50  text-brand-700  dark:bg-brand-900/30 dark:text-brand-300',
       variant === 'success' && 'bg-green-50  text-green-700  dark:bg-green-900/30 dark:text-green-300',
       variant === 'warning' && 'bg-amber-50  text-amber-700  dark:bg-amber-900/30 dark:text-amber-300',
-      variant === 'danger'  && 'bg-red-50    text-red-700    dark:bg-red-900/30   dark:text-red-300',
+      variant === 'danger' && 'bg-red-50    text-red-700    dark:bg-red-900/30   dark:text-red-300',
       className
     )}>
       {children}
@@ -92,10 +93,10 @@ export function Badge({ children, variant = 'default', className }: BadgeProps) 
 // ─── EmptyState ───────────────────────────────────────────────────────────────
 
 interface EmptyStateProps {
-  icon?:     React.ReactNode;
-  title:     string;
-  message?:  string;
-  action?:   React.ReactNode;
+  icon?: React.ReactNode;
+  title: string;
+  message?: string;
+  action?: React.ReactNode;
 }
 
 export function EmptyState({ icon, title, message, action }: EmptyStateProps) {
