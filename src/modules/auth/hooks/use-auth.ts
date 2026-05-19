@@ -1,13 +1,22 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { api, getApiError } from '@/shared/lib/api';
 import { queryKeys } from '@/shared/lib/query-keys';
 import { useAuthStore } from '../store';
 import { toast } from '@/shared/components/ui/toast';
 import type { ApiSuccess, AuthResponse, LoginDto, RegisterDto } from '@/shared/types/api';
 
+
+function useSafeRedirect(fallback = '/feed'): string {
+  const params = useSearchParams();
+  const redirect = params.get('redirect') ?? '';
+  if (redirect && redirect.startsWith('/') && !redirect.startsWith('//')) {
+    return redirect;
+  }
+  return fallback;
+}
 // ─── useMe ────────────────────────────────────────────────────────────────────
 
 export function useMe() {
@@ -24,6 +33,7 @@ export function useLogin() {
   const setAuth = useAuthStore((s) => s.setAuth);
   const router = useRouter();
   const qc = useQueryClient();
+  const redirectTo = useSafeRedirect('/feed');
 
   return useMutation({
     mutationFn: (dto: LoginDto) =>
@@ -34,7 +44,9 @@ export function useLogin() {
       setAuth({ id: user.id, email: user.email }, tokens);
       qc.invalidateQueries({ queryKey: queryKeys.auth.me });
       toast.success('Welcome back!', user.email);
-      router.push('/feed');
+      // router.push('/feed');
+      router.push(redirectTo as any);
+
     },
 
     onError: async (err) => {
@@ -48,6 +60,8 @@ export function useRegister() {
   const setAuth = useAuthStore((s) => s.setAuth);
   const router = useRouter();
   const qc = useQueryClient();
+  const redirectTo = useSafeRedirect('/feed');
+
 
   return useMutation({
     mutationFn: (dto: RegisterDto) =>
@@ -58,7 +72,8 @@ export function useRegister() {
       setAuth({ id: user.id, email: user.email }, tokens);
       qc.invalidateQueries({ queryKey: queryKeys.auth.me });
       toast.success('Account created!', `Welcome, ${user.name ?? user.email}`);
-      router.push('/feed');
+      // router.push('/feed');
+      router.push(redirectTo as any);
     },
 
     onError: async (err) => {

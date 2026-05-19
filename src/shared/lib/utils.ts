@@ -21,7 +21,7 @@ export function formatDate(date: string | Date | undefined): string {
 
 /** Generate a consistent avatar URL from an ID */
 export function avatarUrl(seed: string, size = 80): string {
-  return `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(seed)}&size=${size}&backgroundColor=4f6ef7&fontColor=ffffff`;
+  return `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(seed)}&size=${size}&backgroundColor=0ea5e9&fontColor=ffffff`;
 }
 
 /** Truncate a string to maxLength with ellipsis */
@@ -44,6 +44,6 @@ export function initials(name?: string): string {
 /** Format a number compactly: 1200 → "1.2k" */
 export function compactNumber(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000)     return `${(n / 1_000).toFixed(1)}k`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`;
   return String(n);
 }

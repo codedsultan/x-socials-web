@@ -3,15 +3,17 @@
 import Link from 'next/link';
 import { Route } from 'next';
 import { usePathname } from 'next/navigation';
-import { Home, Search, User, PenSquare, LogOut, Sun, Moon, Zap } from 'lucide-react';
+import { Home, Search, User, PenSquare, LogOut, Sun, Moon, SatelliteDish } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { cn } from '@/shared/lib/utils';
+import { NotificationBell } from '@/modules/notifications/components/notification-bell';
 import { Button } from '@/shared/components/ui/button';
 import { Avatar } from '@/shared/components/ui/primitives';
 import { useAuthStore } from '@/modules/auth/store';
 import { useLogout } from '@/modules/auth/hooks/use-auth';
 import { useState } from 'react';
 import { CreatePostForm } from '@/modules/posts/components/create-post-form';
+
 
 const navItems = [
   { href: '/feed' as Route, icon: Home, label: 'Feed' },
@@ -31,10 +33,10 @@ export function Sidebar() {
         {/* Logo */}
         <Link href="/feed" className="flex items-center gap-2.5 px-2 py-3 mb-2">
           <span className="h-8 w-8 rounded-xl bg-brand-500 flex items-center justify-center">
-            <Zap className="h-4 w-4 text-white fill-white" />
+            <SatelliteDish className="h-4 w-4 text-white fill-white" />
           </span>
           <span className="font-display font-bold text-xl tracking-tight text-neutral-900 dark:text-white">
-            x-socials
+            X Socials
           </span>
         </Link>
 
@@ -73,6 +75,8 @@ export function Sidebar() {
               Profile
             </Link>
           )}
+
+          {user && <NotificationBell showLabel />}
         </nav>
 
         {/* Compose */}
@@ -85,6 +89,7 @@ export function Sidebar() {
 
         {/* Footer */}
         <div className="border-t border-neutral-100 dark:border-neutral-800 pt-3 mt-1 space-y-1">
+
           <button
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
             className="flex items-center gap-3 w-full px-3 py-2 rounded-xl text-sm text-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all"
