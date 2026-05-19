@@ -1,22 +1,14 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { api, getApiError } from '@/shared/lib/api';
 import { queryKeys } from '@/shared/lib/query-keys';
 import { useAuthStore } from '../store';
 import { toast } from '@/shared/components/ui/toast';
 import type { ApiSuccess, AuthResponse, LoginDto, RegisterDto } from '@/shared/types/api';
+import { useSafeRedirect } from './use-safe-redirect';
 
-
-function useSafeRedirect(fallback = '/feed'): string {
-  const params = useSearchParams();
-  const redirect = params.get('redirect') ?? '';
-  if (redirect && redirect.startsWith('/') && !redirect.startsWith('//')) {
-    return redirect;
-  }
-  return fallback;
-}
 // ─── useMe ────────────────────────────────────────────────────────────────────
 
 export function useMe() {
