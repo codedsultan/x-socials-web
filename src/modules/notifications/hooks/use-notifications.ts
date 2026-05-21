@@ -8,16 +8,18 @@ import { toast } from '@/shared/components/ui/toast';
 import type { ApiSuccess, PagedResult } from '@/shared/types/api';
 
 export type NotificationType =
-  | 'like_post' | 'like_comment' | 'follow' | 'comment' | 'reply';
+  | 'like_post' | 'like_comment' | 'follow' | 'comment' | 'reply'
+  | 'content_removed';
 
 export interface Notification {
-  id:          string;
-  type:        NotificationType;
-  actorId:     string;
+  id: string;
+  type: NotificationType;
+  actorId: string;
   referenceId: string | null;
-  read:        boolean;
-  createdAt?:  string;
+  read: boolean;
+  createdAt?: string;
 }
+
 
 const LIMIT = 20;
 
@@ -31,7 +33,7 @@ export function useNotifications(unreadOnly = false) {
 
     queryFn: ({ pageParam }) => {
       const params = new URLSearchParams({ limit: String(LIMIT) });
-      if (pageParam)  params.set('after', pageParam);
+      if (pageParam) params.set('after', pageParam);
       if (unreadOnly) params.set('unread', 'true');
       return api.get(`notifications?${params}`).json<ApiSuccess<PagedResult<Notification>>>();
     },
@@ -40,13 +42,13 @@ export function useNotifications(unreadOnly = false) {
     getNextPageParam: (last) => last.data.meta.nextCursor ?? undefined,
 
     select: (data) => ({
-      pages:    data.pages,
+      pages: data.pages,
       pageParams: data.pageParams,
-      items:    data.pages.flatMap((p) => p.data.items),
-      hasMore:  data.pages.at(-1)?.data.meta.hasMore ?? false,
+      items: data.pages.flatMap((p) => p.data.items),
+      hasMore: data.pages.at(-1)?.data.meta.hasMore ?? false,
     }),
 
-    enabled:  isAuthed,
+    enabled: isAuthed,
     // Refresh every 30 s so the bell stays current without websockets
     refetchInterval: 30_000,
   });
@@ -59,10 +61,10 @@ export function useUnreadCount() {
 
   return useQuery({
     queryKey: queryKeys.notifications.unreadCount,
-    queryFn:  () =>
+    queryFn: () =>
       api.get('notifications/unread-count').json<ApiSuccess<{ count: number }>>(),
-    select:   (res) => res.data.count,
-    enabled:  isAuthed,
+    select: (res) => res.data.count,
+    enabled: isAuthed,
     refetchInterval: 30_000,
   });
 }

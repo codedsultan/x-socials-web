@@ -36,7 +36,15 @@ export function FeedList() {
     );
   }
 
-  if (!data?.items.length) {
+  // Filter display items:
+  //   author_deleted → omit entirely (user chose to delete, no tombstone needed)
+  //   admin_removed  → show tombstone so the author knows what happened
+  //   not deleted    → show normally
+  const visibleItems = (data?.items ?? []).filter(
+    (post) => !post.deletedAt || post.deletionReason === 'admin_removed'
+  );
+
+  if (!visibleItems.length) {
     return (
       <EmptyState
         icon={<Newspaper className="h-12 w-12" />}
@@ -49,7 +57,7 @@ export function FeedList() {
   return (
     <>
       <div className="space-y-4">
-        {data.items.map((post) => (
+        {visibleItems.map((post) => (
           <PostCard
             key={post.id}
             post={post}
@@ -66,7 +74,7 @@ export function FeedList() {
           </div>
         )}
 
-        {!hasNextPage && data.items.length > 0 && (
+        {!hasNextPage && visibleItems.length > 0 && (
           <p className="text-center text-sm text-neutral-400 py-4">
             You&apos;re all caught up ✓
           </p>

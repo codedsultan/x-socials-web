@@ -1,4 +1,4 @@
-# x-socials Web
+# X-Socials Web
 
 Next.js 16 frontend for the x-socials API.
 
@@ -104,3 +104,26 @@ All seed users share the password **SeedPass123**
 - `bob@example.com` — follows alice
 - `charlie@example.com` — follows alice + bob
 - `diana@example.com` — follows alice
+
+
+## Related services
+
+| Service | Role |
+|---|---|
+| [x-socials](https://github.com/codedsultan/x-socials) | Node.js social platform backend API — content source |
+| [x-socials-admin](https://github.com/codedsultan/x-socials-admin) | Laravel admin panel — review queue, dashboard, auto-remove |
+| [x-socials-moderator](https://github.com/codedsultan/x-socials-ai-moderator) | FastAPI AI engine — analyses content, writes results |
+
+---
+
+## License
+
+MIT License — see the [LICENSE](LICENSE) file for details.
+
+---
+
+## Author
+
+**Olusegun Ibraheem**
+- Website: [codesultan.xurl.fyi](https://codesultan.xurl.fyi)
+- Email: codesultan369@gmail.com
