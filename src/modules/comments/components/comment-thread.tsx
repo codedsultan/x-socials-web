@@ -22,15 +22,15 @@ type FormValues = z.infer<typeof schema>;
 
 function CommentRow({ comment, postId, depth = 0 }: { comment: Comment; postId: string; depth?: number }) {
   const [showReplyForm, setShowReplyForm] = useState(false);
-  const [showReplies, setShowReplies] = useState(false);
-  const myUserId = useAuthStore((s) => s.user?.id);
-  const isAuthor = myUserId === comment.authorId;
-  const author = usePostAuthor(comment.authorId);
+  const [showReplies,   setShowReplies]   = useState(false);
+  const myUserId   = useAuthStore((s) => s.user?.id);
+  const isAuthor   = myUserId === comment.authorId;
+  const author     = usePostAuthor(comment.authorId);
   const deleteComment = useDeleteComment(postId);
   const createComment = useCreateComment(postId);
-  const repliesQuery = useReplies(showReplies ? comment.id : '');
+  const repliesQuery  = useReplies(showReplies ? comment.id : '');
 
-  const { register, handleSubmit, reset, formState: { errors: _errors } } = useForm<FormValues>({
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
   });
 
@@ -39,6 +39,19 @@ function CommentRow({ comment, postId, depth = 0 }: { comment: Comment; postId: 
     reset();
     setShowReplyForm(false);
     setShowReplies(true);
+  }
+
+  // Soft-deleted comment — render a tombstone so thread structure is preserved
+  if (comment.deletedAt) {
+    return (
+      <div className={depth > 0 ? 'ml-8 pl-4 border-l-2 border-neutral-100 dark:border-neutral-800' : ''}>
+        <div className="py-3">
+          <p className="text-sm text-neutral-400 dark:text-neutral-600 italic">
+            This comment has been removed.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (

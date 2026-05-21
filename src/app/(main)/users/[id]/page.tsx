@@ -15,13 +15,13 @@ import { compactNumber, formatDate } from '@/shared/lib/utils';
 import type { FeedItem } from '@/shared/types/api';
 
 export default function UserProfilePage() {
-  const { id }   = useParams<{ id: string }>();
+  const { id } = useParams<{ id: string }>();
   const myUserId = useAuthStore((s) => s.user?.id);
-  const isMe     = myUserId === id;
+  const isMe = myUserId === id;
   const isAuthed = useAuthStore((s) => s.isAuthed());
 
   const { data: user, isLoading } = useUser(id);
-  const { follow, unfollow }      = useFollow(id);
+  const { follow, unfollow } = useFollow(id);
   const {
     data: feedData, isLoading: postsLoading,
     isFetchingNextPage, fetchNextPage, hasNextPage,
@@ -35,6 +35,27 @@ export default function UserProfilePage() {
 
   if (isLoading) return <div className="flex justify-center py-20"><Spinner className="h-6 w-6" /></div>;
   if (!user) return <EmptyState title="User not found" />;
+
+  if (user.suspended) {
+    return (
+      <div className="space-y-4 animate-fade-up">
+        <Link href="/feed" className="inline-flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200 transition-colors">
+          <ArrowLeft className="h-4 w-4" /> Back to feed
+        </Link>
+        <div className="rounded-2xl border border-neutral-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-10 text-center space-y-3">
+          <div className="flex justify-center">
+            <span className="inline-flex items-center justify-center h-14 w-14 rounded-full bg-neutral-100 dark:bg-neutral-800">
+              <Users className="h-7 w-7 text-neutral-400" />
+            </span>
+          </div>
+          <h2 className="font-bold text-lg text-neutral-800 dark:text-neutral-200">Account suspended</h2>
+          <p className="text-sm text-neutral-400 max-w-xs mx-auto">
+            This account has been suspended for violating our community guidelines.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const following = user.isFollowedByMe ?? false;
 
@@ -78,7 +99,7 @@ export default function UserProfilePage() {
           <FileText className="h-4 w-4 text-neutral-400" /> Posts
         </h2>
         {postsLoading ? (
-          <div className="space-y-4">{[1,2].map(i => <PostCardSkeleton key={i} />)}</div>
+          <div className="space-y-4">{[1, 2].map(i => <PostCardSkeleton key={i} />)}</div>
         ) : feedData?.items.length === 0 ? (
           <EmptyState title="No posts yet" message={isMe ? 'Share your first thought!' : "This user hasn't posted yet"} />
         ) : (

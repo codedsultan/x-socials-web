@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
+import { HTTPError } from 'ky';
 import { api, getApiError } from '@/shared/lib/api';
 import { queryKeys } from '@/shared/lib/query-keys';
 import { toast } from '@/shared/components/ui/toast';
@@ -15,29 +16,29 @@ const LIMIT = 20;
 export function usePost(id: string) {
   return useQuery({
     queryKey: queryKeys.posts.detail(id),
-    queryFn:  () => api.get(`posts/${id}`).json<ApiSuccess<{ post: Post }>>(),
-    select:   (res) => res.data.post,
-    enabled:  !!id,
+    queryFn: () => api.get(`posts/${id}`).json<ApiSuccess<{ post: Post }>>(),
+    select: (res) => res.data.post,
+    enabled: !!id,
   });
 }
 
 // ─── usePosts (offset — filtered by tag/author) ───────────────────────────────
 
 interface UsePostsParams {
-  tag?:      string;
+  tag?: string;
   authorId?: string;
-  page?:     number;
+  page?: number;
 }
 
 export function usePosts(params: UsePostsParams = {}) {
   const { tag, authorId, page = 1 } = params;
   const searchParams = new URLSearchParams({ page: String(page), limit: String(LIMIT) });
-  if (tag)      searchParams.set('tag', tag);
+  if (tag) searchParams.set('tag', tag);
   if (authorId) searchParams.set('authorId', authorId);
 
   return useQuery({
     queryKey: queryKeys.posts.list({ tag, authorId, page }),
-    queryFn:  () =>
+    queryFn: () =>
       api.get(`posts?${searchParams}`).json<ApiSuccess<PagedResult<Post>>>(),
     select: (res) => res.data,
   });
@@ -59,9 +60,9 @@ export function usePostTimeline() {
     getNextPageParam: (last) => last.data.meta.nextCursor ?? undefined,
 
     select: (data) => ({
-      pages:   data.pages,
+      pages: data.pages,
       pageParams: data.pageParams,
-      items:   data.pages.flatMap((p) => p.data.items),
+      items: data.pages.flatMap((p) => p.data.items),
       hasMore: data.pages.at(-1)?.data.meta.hasMore ?? false,
     }),
   });
@@ -118,6 +119,16 @@ export function useDeletePost() {
       qc.invalidateQueries({ queryKey: queryKeys.posts.feed });
     },
 
-    onError: async (err) => { throw new Error(await getApiError(err)); },
+    // onError: async (err) => { throw new Error(await getApiError(err)); },
+    onError: async (err, postId) => {
+      const error = await getApiError(err);
+      // 404 = already removed (e.g. by admin) — treat as success, clean up cache
+      if (err instanceof HTTPError && err.response.status === 404) {
+        qc.removeQueries({ queryKey: queryKeys.posts.detail(postId) });
+        qc.invalidateQueries({ queryKey: queryKeys.posts.feed });
+        return;
+      }
+      throw new Error(error);
+    },
   });
 }

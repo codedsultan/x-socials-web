@@ -53,6 +53,21 @@ export function PostCard({ post, likedByMe = false, onEdit, className }: PostCar
     });
   }
 
+  // Soft-deleted — render a tombstone instead of the full card
+  if (post.deletedAt) {
+    return (
+      <article className={cn(
+        'rounded-2xl border border-neutral-100 dark:border-neutral-800',
+        'bg-white/50 dark:bg-neutral-900/50 p-5',
+        className,
+      )}>
+        <p className="text-sm text-neutral-400 dark:text-neutral-600 italic">
+          This post has been removed.
+        </p>
+      </article>
+    );
+  }
+
   return (
     <article className={cn(
       'group rounded-2xl border border-neutral-100 dark:border-neutral-800',

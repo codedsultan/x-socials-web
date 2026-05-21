@@ -57,6 +57,21 @@ export const api: KyInstance = ky.create({
 
     afterResponse: [
       async ({ request, response }) => {
+
+        if (response.status === 403) {
+          try {
+            const body = await response.clone().json() as { error?: string };
+            if (body.error?.toLowerCase().includes('suspended')) {
+              const store = await getAuthStore();
+              store.clearAuth();
+              if (typeof window !== 'undefined') {
+                window.location.href = '/login?reason=suspended';
+              }
+              return response;
+            }
+          } catch { /* non-JSON 403 — fall through */ }
+        }
+
         if (response.status !== 401) return response;
 
         const store = await getAuthStore();

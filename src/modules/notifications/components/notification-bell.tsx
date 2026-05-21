@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Bell, Heart, UserPlus, MessageCircle, Reply, Check } from 'lucide-react';
+import { Bell, Heart, UserPlus, MessageCircle, Reply, Check, ShieldAlert } from 'lucide-react';
 import { cn, timeAgo } from '@/shared/lib/utils';
 import { Spinner } from '@/shared/components/ui/primitives';
 import { Button } from '@/shared/components/ui/button';
@@ -23,6 +23,7 @@ const typeConfig: Record<NotificationType, { label: string; Icon: React.ElementT
   follow: { label: 'followed you', Icon: UserPlus, color: 'text-brand-500' },
   comment: { label: 'commented on your post', Icon: MessageCircle, color: 'text-green-500' },
   reply: { label: 'replied to your comment', Icon: Reply, color: 'text-blue-500' },
+  content_removed: { label: 'Your content was removed by a moderator', Icon: ShieldAlert, color: 'text-amber-500' },
 };
 
 // ─── Single notification row ──────────────────────────────────────────────────
@@ -31,6 +32,8 @@ function NotificationRow({ notification }: { notification: Notification }) {
   const markRead = useMarkRead();
   const config = typeConfig[notification.type] ?? typeConfig.comment;
   const { Icon } = config;
+
+  const isSystemNotification = notification.type === 'content_removed';
 
   return (
     <div
@@ -47,8 +50,15 @@ function NotificationRow({ notification }: { notification: Notification }) {
 
       <div className="flex-1 min-w-0 space-y-0.5">
         <p className="text-sm text-neutral-700 dark:text-neutral-300 leading-snug">
-          <span className="font-medium">{notification.actorId.slice(0, 8)}…</span>
-          {' '}{config.label}
+          {isSystemNotification ? (
+            // System notification — no actor, show the full label as the message
+            <span>{config.label}</span>
+          ) : (
+            <>
+              <span className="font-medium">{notification.actorId.slice(0, 8)}…</span>
+              {' '}{config.label}
+            </>
+          )}
         </p>
         <p className="text-xs text-neutral-400">{timeAgo(notification.createdAt)}</p>
       </div>

@@ -72,6 +72,7 @@ export interface UserProfile {
   id: string;
   name?: string;
   email: string;
+  suspended?: boolean;
   createdAt?: string;
   followerCount?: number;
   followingCount?: number;
@@ -97,6 +98,8 @@ export interface Post {
   authorId: string;
   tags: string[];
   likesCount: number;
+  deletedAt?: string | null;
+  deletionReason?: string | null;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -125,6 +128,8 @@ export interface Comment {
   authorId: string;
   content: string;
   parentId?: string | null;
+  deletedAt?: string | null;
+  deletionReason?: string | null;
   createdAt?: string;
   updatedAt?: string;
 }

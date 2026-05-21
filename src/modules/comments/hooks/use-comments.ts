@@ -4,6 +4,7 @@ import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-q
 import { api, getApiError } from '@/shared/lib/api';
 import { queryKeys } from '@/shared/lib/query-keys';
 import type { ApiSuccess, Comment, PagedResult, CreateCommentDto } from '@/shared/types/api';
+import { HTTPError } from 'ky';
 
 const LIMIT = 20;
 
@@ -26,10 +27,10 @@ export function useComments(postId: string) {
     getNextPageParam: (last) => last.data.meta.nextCursor ?? undefined,
 
     select: (data) => ({
-      pages:    data.pages,
+      pages: data.pages,
       pageParams: data.pageParams,
-      items:    data.pages.flatMap((p) => p.data.items),
-      hasMore:  data.pages.at(-1)?.data.meta.hasMore ?? false,
+      items: data.pages.flatMap((p) => p.data.items),
+      hasMore: data.pages.at(-1)?.data.meta.hasMore ?? false,
     }),
 
     enabled: !!postId,
@@ -54,10 +55,10 @@ export function useReplies(commentId: string) {
     getNextPageParam: (last) => last.data.meta.nextCursor ?? undefined,
 
     select: (data) => ({
-      pages:    data.pages,
+      pages: data.pages,
       pageParams: data.pageParams,
-      items:    data.pages.flatMap((p) => p.data.items),
-      hasMore:  data.pages.at(-1)?.data.meta.hasMore ?? false,
+      items: data.pages.flatMap((p) => p.data.items),
+      hasMore: data.pages.at(-1)?.data.meta.hasMore ?? false,
     }),
 
     enabled: !!commentId,
@@ -90,9 +91,18 @@ export function useDeleteComment(postId: string) {
 
   return useMutation({
     mutationFn: (commentId: string) => api.delete(`comments/${commentId}`),
-    onSuccess:  () => {
+    onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.comments.list(postId) });
     },
-    onError: async (err) => { throw new Error(await getApiError(err)); },
+    // onError: async (err) => { throw new Error(await getApiError(err)); },
+    onError: async (err, _commentId) => {
+      // 404 = comment already gone (admin soft-deleted or race condition)
+      // Treat as success — refresh the list so any tombstone shows
+      if (err instanceof HTTPError && err.response.status === 404) {
+        qc.invalidateQueries({ queryKey: queryKeys.comments.list(postId) });
+        return;
+      }
+      throw new Error(await getApiError(err));
+    },
   });
 }
