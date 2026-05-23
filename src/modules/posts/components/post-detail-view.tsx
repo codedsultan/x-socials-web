@@ -1,11 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Heart } from 'lucide-react';
 import { Avatar, Spinner, EmptyState, Badge } from '@/shared/components/ui/primitives';
-// import { Button } from '@/shared/components/ui/button';
 import { CommentThread } from '@/modules/comments/components/comment-thread';
 import { usePost } from '@/modules/posts/hooks/use-posts';
 import { usePostAuthor } from '@/modules/users/hooks/use-post-author';
@@ -14,19 +12,16 @@ import { useAuthStore } from '@/modules/auth/store';
 import { toast } from '@/shared/components/ui/toast';
 import { timeAgo, compactNumber, cn } from '@/shared/lib/utils';
 
-export default function PostPage() {
-  const { id } = useParams<{ id: string }>();
+export function PostDetailView({ id }: { id: string }) {
   const isAuthed = useAuthStore((s) => s.isAuthed());
 
   const { data: post, isLoading, isError } = usePost(id);
   const author = usePostAuthor(post?.authorId ?? '');
   const toggleLike = useToggleLike();
 
-  // Track local liked state — the feed optimistic update doesn't apply here
   const [liked, setLiked] = useState(false);
   const [likesCount, setLikesCount] = useState<number | null>(null);
 
-  // Sync local state once post loads
   const displayLikes = likesCount ?? post?.likesCount ?? 0;
 
   function handleLike() {
@@ -43,7 +38,6 @@ export default function PostPage() {
       { targetId: post.id, targetType: 'post', currentlyLiked: liked },
       {
         onError: () => {
-          // Roll back
           setLiked(liked);
           setLikesCount(displayLikes);
           toast.error('Could not update like');
@@ -70,7 +64,6 @@ export default function PostPage() {
       </Link>
 
       <article className="space-y-6">
-        {/* Author */}
         <div className="flex items-center gap-3">
           <Link href={`/users/${post.authorId}`}>
             <Avatar name={author.name} size="md" />
@@ -86,17 +79,14 @@ export default function PostPage() {
           </div>
         </div>
 
-        {/* Title */}
         <h1 className="font-display text-3xl font-bold text-neutral-900 dark:text-white leading-tight">
           {post.title}
         </h1>
 
-        {/* Content */}
         <p className="text-neutral-700 dark:text-neutral-300 leading-relaxed whitespace-pre-wrap text-[15px]">
           {post.content}
         </p>
 
-        {/* Tags */}
         {post.tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {post.tags.map((tag) => (
@@ -107,7 +97,6 @@ export default function PostPage() {
           </div>
         )}
 
-        {/* Like action */}
         <div className="flex items-center gap-2 pt-2 border-t border-neutral-100 dark:border-neutral-800">
           <button
             onClick={handleLike}
