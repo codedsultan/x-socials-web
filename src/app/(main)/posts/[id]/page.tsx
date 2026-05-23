@@ -1,4 +1,4 @@
-import { PostDetailView } from './post-detail-view';
+import { PostDetailView } from '@/modules/posts/components/post-detail-view';
 
 export default async function PostPage({
   params,
