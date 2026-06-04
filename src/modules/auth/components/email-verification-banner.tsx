@@ -1,19 +1,24 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Mail, X, ArrowRight, CheckCircle } from 'lucide-react';
 import { useAuthStore } from '@/modules/auth/store';
 import { useRequestEmailVerification } from '@/modules/auth/hooks/use-auth';
+import { Button } from '@/shared/components/ui/button';
 import { cn } from '@/shared/lib/utils';
 
 export function EmailVerificationBanner() {
   const isAuthed = useAuthStore((s) => s.isAuthed());
   const isVerified = useAuthStore((s) => s.isEmailVerified());
   const [dismissed, setDismissed] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const resend = useRequestEmailVerification();
   const sent = resend.isSuccess;
 
-  if (!isAuthed || isVerified || dismissed) return null;
+  useEffect(() => { setMounted(true); }, []);
+
+  if (!mounted || !isAuthed || isVerified || dismissed) return null;
 
   return (
     <div className="relative overflow-hidden border-b border-amber-200/60 dark:border-amber-800/40 bg-gradient-to-r from-amber-50 via-orange-50/50 to-amber-50/30 dark:from-amber-950/30 dark:via-orange-950/20 dark:to-amber-950/10">
@@ -47,7 +52,22 @@ export function EmailVerificationBanner() {
 
         {/* Actions */}
         <div className="flex items-center gap-2 flex-shrink-0">
+          <Link
+            href="/verify-email"
+            className="text-xs font-semibold text-amber-700 dark:text-amber-300 underline underline-offset-2 hover:text-amber-900 dark:hover:text-amber-100 transition-colors"
+          >
+            Enter code
+          </Link>
           {!sent && (
+            // <Button
+            //   variant="outline"
+            //   size="sm"
+            //   onClick={() => resend.mutate()}
+            //   loading={resend.isPending}
+            //   className="text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/40 h-7 text-xs"
+            // >
+            //   Resend
+            // </Button>
             <button
               onClick={() => resend.mutate()}
               disabled={resend.isPending}

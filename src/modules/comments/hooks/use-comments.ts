@@ -78,6 +78,8 @@ export function useCreateComment(postId: string) {
 
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.comments.list(postId) });
+      qc.invalidateQueries({ queryKey: queryKeys.posts.detail(postId) });
+      qc.invalidateQueries({ queryKey: queryKeys.posts.feed });
     },
 
     onError: async (err) => { throw new Error(await getApiError(err)); },
@@ -93,6 +95,8 @@ export function useDeleteComment(postId: string) {
     mutationFn: (commentId: string) => api.delete(`comments/${commentId}`),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.comments.list(postId) });
+      qc.invalidateQueries({ queryKey: queryKeys.posts.detail(postId) });
+      qc.invalidateQueries({ queryKey: queryKeys.posts.feed });
     },
     // onError: async (err) => { throw new Error(await getApiError(err)); },
     onError: async (err, _commentId) => {

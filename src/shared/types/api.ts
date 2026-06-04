@@ -115,6 +115,7 @@ export interface Post {
   authorId: string;
   tags: string[];
   likesCount: number;
+  commentsCount: number;
   deletedAt?: string | null;
   deletionReason?: string | null;
   createdAt?: string;

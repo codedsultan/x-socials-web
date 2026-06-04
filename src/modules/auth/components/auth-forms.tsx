@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Eye, EyeOff } from 'lucide-react';
@@ -14,6 +14,7 @@ import {
   useForgotPassword,
   useResetPassword,
   useVerifyEmail,
+  useRequestEmailVerification,
 } from '../hooks/use-auth';
 
 // ─── LoginForm ────────────────────────────────────────────────────────────────
@@ -180,6 +181,39 @@ const forgotSchema = z.object({
 });
 type ForgotValues = z.infer<typeof forgotSchema>;
 
+function ForgotPasswordSent({ email }: { email: string }) {
+  const resend = useForgotPassword();
+  const { remaining, canResend, start } = useCountdown(60);
+
+  useEffect(() => { start(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function handleResend() {
+    start();
+    resend.mutate({ email });
+  }
+
+  return (
+    <div className="space-y-4 text-center">
+      <div className="text-4xl">📬</div>
+      <p className="text-sm text-neutral-600 dark:text-neutral-400">
+        If <strong>{email}</strong> is registered, a reset code is on its way.
+        Check your inbox and{' '}
+        <Link href="/reset-password" className="text-brand-600 dark:text-brand-400 font-medium hover:underline">
+          enter the code
+        </Link>
+        .
+      </p>
+      <p className="text-xs text-neutral-400">The code expires in 10 minutes.</p>
+      <ResendButton
+        canResend={canResend}
+        remaining={remaining}
+        isPending={resend.isPending}
+        onClick={handleResend}
+      />
+    </div>
+  );
+}
+
 export function ForgotPasswordForm() {
   const [sent, setSent] = useState(false);
   const [sentEmail, setSentEmail] = useState('');
@@ -195,22 +229,7 @@ export function ForgotPasswordForm() {
     setSent(true);
   }
 
-  if (sent) {
-    return (
-      <div className="space-y-4 text-center">
-        <div className="text-4xl">📬</div>
-        <p className="text-sm text-neutral-600 dark:text-neutral-400">
-          If <strong>{sentEmail}</strong> is registered, a reset code is on its way.
-          Check your inbox and{' '}
-          <Link href="/reset-password" className="text-brand-600 dark:text-brand-400 font-medium hover:underline">
-            enter the code
-          </Link>
-          .
-        </p>
-        <p className="text-xs text-neutral-400">The code expires in 10 minutes.</p>
-      </div>
-    );
-  }
+  if (sent) return <ForgotPasswordSent email={sentEmail} />;
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -254,15 +273,25 @@ export function ResetPasswordForm() {
   const [showPw, setShowPw] = useState(false);
   const [apiError, setApiError] = useState('');
   const reset = useResetPassword();
+  const resend = useForgotPassword();
+  const { remaining, canResend, start } = useCountdown(60);
 
-  const { register, handleSubmit, formState: { errors } } = useForm<ResetValues>({
+  const { register, control, handleSubmit, formState: { errors } } = useForm<ResetValues>({
     resolver: zodResolver(resetSchema),
   });
+  const watchedEmail = useWatch({ control, name: 'email' });
+  const emailValid = z.string().email().safeParse(watchedEmail).success;
 
   async function onSubmit(values: ResetValues) {
     setApiError('');
     try { await reset.mutateAsync(values); }
     catch (err) { setApiError(err instanceof Error ? err.message : 'Reset failed'); }
+  }
+
+  function handleResend() {
+    if (!emailValid) return;
+    start();
+    resend.mutate({ email: watchedEmail });
   }
 
   return (
@@ -310,11 +339,12 @@ export function ResetPasswordForm() {
         Set new password
       </Button>
 
-      <p className="text-center text-sm text-neutral-500">
-        <Link href="/forgot-password" className="text-brand-600 dark:text-brand-400 font-medium hover:underline">
-          Resend code
-        </Link>
-      </p>
+      <ResendButton
+        canResend={canResend && emailValid}
+        remaining={remaining}
+        isPending={resend.isPending}
+        onClick={handleResend}
+      />
     </form>
   );
 }
@@ -329,6 +359,11 @@ type VerifyValues = z.infer<typeof verifySchema>;
 export function VerifyEmailForm() {
   const [apiError, setApiError] = useState('');
   const verify = useVerifyEmail();
+  const resend = useRequestEmailVerification();
+  const { remaining, canResend, start } = useCountdown(60);
+
+  // Code was just sent on registration — start countdown immediately
+  useEffect(() => { start(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const { register, handleSubmit, formState: { errors } } = useForm<VerifyValues>({
     resolver: zodResolver(verifySchema),
@@ -338,6 +373,11 @@ export function VerifyEmailForm() {
     setApiError('');
     try { await verify.mutateAsync(values); }
     catch (err) { setApiError(err instanceof Error ? err.message : 'Verification failed'); }
+  }
+
+  function handleResend() {
+    start();
+    resend.mutate();
   }
 
   return (
@@ -357,11 +397,57 @@ export function VerifyEmailForm() {
       <Button type="submit" size="lg" className="w-full" loading={verify.isPending}>
         Verify email
       </Button>
+      <ResendButton
+        canResend={canResend}
+        remaining={remaining}
+        isPending={resend.isPending}
+        onClick={handleResend}
+      />
     </form>
   );
 }
 
 // ─── Shared ───────────────────────────────────────────────────────────────────
+
+function useCountdown(seconds = 60) {
+  const [remaining, setRemaining] = useState(0);
+  const ref = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const start = useCallback(() => {
+    if (ref.current) clearInterval(ref.current);
+    setRemaining(seconds);
+    ref.current = setInterval(() => {
+      setRemaining((s) => {
+        if (s <= 1) { clearInterval(ref.current!); return 0; }
+        return s - 1;
+      });
+    }, 1000);
+  }, [seconds]);
+
+  useEffect(() => () => { if (ref.current) clearInterval(ref.current); }, []);
+
+  return { remaining, canResend: remaining === 0, start };
+}
+
+function ResendButton({ canResend, remaining, isPending, onClick }: {
+  canResend: boolean;
+  remaining: number;
+  isPending: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <div className="text-center">
+      <button
+        type="button"
+        disabled={!canResend || isPending}
+        onClick={onClick}
+        className="text-sm text-brand-600 dark:text-brand-400 font-medium hover:underline disabled:opacity-40 disabled:cursor-not-allowed disabled:no-underline transition-opacity"
+      >
+        {canResend ? 'Resend code' : `Resend in ${remaining}s`}
+      </button>
+    </div>
+  );
+}
 
 function ApiErrorBox({ message }: { message: string }) {
   return (
