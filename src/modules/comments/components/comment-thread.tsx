@@ -30,7 +30,7 @@ function CommentRow({ comment, postId, depth = 0 }: { comment: Comment; postId: 
   const createComment = useCreateComment(postId);
   const repliesQuery  = useReplies(showReplies ? comment.id : '');
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<FormValues>({
+  const { register, handleSubmit, reset, formState: { errors: _errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
   });
 

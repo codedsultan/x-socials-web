@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { Mail, X, ArrowRight, CheckCircle } from 'lucide-react';
 import { useAuthStore } from '@/modules/auth/store';
 import { useRequestEmailVerification } from '@/modules/auth/hooks/use-auth';
-import { Button } from '@/shared/components/ui/button';
 import { cn } from '@/shared/lib/utils';
 
 export function EmailVerificationBanner() {

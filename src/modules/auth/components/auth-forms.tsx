@@ -185,7 +185,7 @@ function ForgotPasswordSent({ email }: { email: string }) {
   const resend = useForgotPassword();
   const { remaining, canResend, start } = useCountdown(60);
 
-  useEffect(() => { start(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { start(); }, [start]);
 
   function handleResend() {
     start();
@@ -363,7 +363,7 @@ export function VerifyEmailForm() {
   const { remaining, canResend, start } = useCountdown(60);
 
   // Code was just sent on registration — start countdown immediately
-  useEffect(() => { start(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { start(); }, [start]);
 
   const { register, handleSubmit, formState: { errors } } = useForm<VerifyValues>({
     resolver: zodResolver(verifySchema),
