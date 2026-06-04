@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
+import type { Route } from 'next';
 import { api, getApiError } from '@/shared/lib/api';
 import { queryKeys } from '@/shared/lib/query-keys';
 import { useAuthStore } from '../store';
@@ -48,7 +49,7 @@ export function useLogin() {
       setAuth({ id: user.id, name: user.name, email: user.email }, tokens);
       qc.invalidateQueries({ queryKey: queryKeys.auth.me });
       toast.success('Welcome back!', user.email);
-      router.push(redirectTo);
+      router.push(redirectTo as Route);
     },
 
     onError: async (err) => {
