@@ -1,5 +1,6 @@
 'use client';
 
+// src/modules/posts/components/post-card.tsx
 import Link from 'next/link';
 import { Heart, MessageCircle, Trash2, Edit } from 'lucide-react';
 import { Avatar, Badge } from '@/shared/components/ui/primitives';
@@ -13,23 +14,23 @@ import { cn, timeAgo, compactNumber } from '@/shared/lib/utils';
 import type { FeedItem, Post } from '@/shared/types/api';
 
 interface PostCardProps {
-  post:       FeedItem | Post;
+  post: FeedItem | Post;
   likedByMe?: boolean;
-  onEdit?:    () => void;
+  onEdit?: () => void;
   className?: string;
 }
 
 export function PostCard({ post, likedByMe = false, onEdit, className }: PostCardProps) {
-  const myUserId  = useAuthStore((s) => s.user?.id);
-  const isAuthor  = myUserId === post.authorId;
-  const isAuthed  = useAuthStore((s) => s.isAuthed());
+  const myUserId = useAuthStore((s) => s.user?.id);
+  const isAuthor = myUserId === post.authorId;
+  const isAuthed = useAuthStore((s) => s.isAuthed());
 
-  const author     = usePostAuthor(post.authorId);
+  const author = usePostAuthor(post.authorId);
   const toggleLike = useToggleLike();
   const deletePost = useDeletePost();
 
-  const liked      = 'likedByMe' in post ? post.likedByMe : likedByMe;
-  const isPending  = toggleLike.isPending;
+  const liked = 'likedByMe' in post ? post.likedByMe : likedByMe;
+  const isPending = toggleLike.isPending;
   const isDeleting = deletePost.isPending;
 
   function handleLike() {
@@ -39,9 +40,7 @@ export function PostCard({ post, likedByMe = false, onEdit, className }: PostCar
     }
     toggleLike.mutate(
       { targetId: post.id, targetType: 'post', currentlyLiked: liked },
-      {
-        onError: () => toast.error('Could not update like', 'Please try again'),
-      }
+      { onError: () => toast.error('Could not update like', 'Please try again') }
     );
   }
 
@@ -49,11 +48,11 @@ export function PostCard({ post, likedByMe = false, onEdit, className }: PostCar
     if (!confirm('Delete this post? This cannot be undone.')) return;
     deletePost.mutate(post.id, {
       onSuccess: () => toast.success('Post deleted'),
-      onError:   () => toast.error('Could not delete post'),
+      onError: () => toast.error('Could not delete post'),
     });
   }
 
-  // Soft-deleted — render a tombstone instead of the full card
+  // Soft-deleted — render a tombstone
   if (post.deletedAt) {
     return (
       <article className={cn(
@@ -134,6 +133,7 @@ export function PostCard({ post, likedByMe = false, onEdit, className }: PostCar
 
       {/* Actions */}
       <div className="flex items-center gap-1 pt-1 border-t border-neutral-50 dark:border-neutral-800">
+        {/* Like */}
         <button
           onClick={handleLike}
           disabled={isPending}
@@ -150,12 +150,14 @@ export function PostCard({ post, likedByMe = false, onEdit, className }: PostCar
           <span>{compactNumber(post.likesCount)}</span>
         </button>
 
+        {/* Comments — shows count, links to the comments section */}
         <Link
           href={`/posts/${post.id}#comments`}
+          aria-label={`${post.commentsCount} comment${post.commentsCount !== 1 ? 's' : ''}`}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-500 hover:text-brand-500 hover:bg-brand-50 dark:hover:bg-brand-900/20 transition-all"
         >
           <MessageCircle className="h-4 w-4" />
-          <span>Comment</span>
+          <span>{compactNumber(post.commentsCount ?? 0)}</span>
         </Link>
       </div>
     </article>

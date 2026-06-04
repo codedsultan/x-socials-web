@@ -77,7 +77,8 @@ export function useRegister() {
       toast.success('Account created!', `Welcome, ${user.name ?? user.email}`);
       // Backend sends a verification email automatically — hint the user
       toast.info('Verify your email', 'Check your inbox for a verification code.');
-      router.push(redirectTo as any);
+      router.push('/verify-email');
+      // router.push(redirectTo as any);
     },
 
     onError: async (err) => {
@@ -119,6 +120,7 @@ export function useRequestEmailVerification() {
 
 export function useVerifyEmail() {
   const setEmailVerified = useAuthStore((s) => s.setEmailVerified);
+  const router = useRouter();
   const qc = useQueryClient();
 
   return useMutation({
@@ -129,6 +131,7 @@ export function useVerifyEmail() {
       setEmailVerified();
       qc.invalidateQueries({ queryKey: queryKeys.auth.me });
       toast.success('Email verified!', 'Your account is fully active.');
+      router.push('/feed');
     },
 
     onError: async (err) => {
