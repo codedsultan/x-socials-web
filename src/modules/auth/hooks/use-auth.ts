@@ -48,7 +48,7 @@ export function useLogin() {
       setAuth({ id: user.id, name: user.name, email: user.email }, tokens);
       qc.invalidateQueries({ queryKey: queryKeys.auth.me });
       toast.success('Welcome back!', user.email);
-      router.push(redirectTo as any);
+      router.push(redirectTo);
     },
 
     onError: async (err) => {
@@ -64,8 +64,6 @@ export function useRegister() {
   const setAuth = useAuthStore((s) => s.setAuth);
   const router = useRouter();
   const qc = useQueryClient();
-  const redirectTo = useSafeRedirect('/feed');
-
   return useMutation({
     mutationFn: (dto: RegisterDto) =>
       api.post('auth/register', { json: dto }).json<ApiSuccess<AuthResponse>>(),
