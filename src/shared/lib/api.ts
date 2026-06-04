@@ -1,39 +1,31 @@
-import ky, {
-  type KyInstance,
-  HTTPError  // Remove 'type' - this is a class that exists at runtime
-} from 'ky';
-
+import ky, { type KyInstance, HTTPError } from 'ky';
 import type { ApiSuccess, AuthTokens } from '@/shared/types/api';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000/api';
 
-// Lazy-import the store so we never import Zustand at module-level on the server
 async function getAuthStore() {
   const { useAuthStore } = await import('@/modules/auth/store');
   return useAuthStore.getState();
 }
 
-// ─── Token refresh logic ───────────────────────────────────────────────────────
+// ─── Token refresh (deduplicated) ────────────────────────────────────────────
 
 let refreshPromise: Promise<AuthTokens> | null = null;
 
 async function refreshTokens(): Promise<AuthTokens> {
-  // Deduplicate concurrent refresh attempts — only one request in flight
   if (refreshPromise) return refreshPromise;
 
   refreshPromise = (async () => {
     const store = await getAuthStore();
     if (!store.refreshToken) throw new Error('No refresh token');
 
-    const res = await ky.post(`${BASE_URL}/auth/refresh`, {
-      json: { refreshToken: store.refreshToken },
-    }).json<ApiSuccess<{ tokens: AuthTokens }>>();
+    const res = await ky
+      .post(`${BASE_URL}/auth/refresh`, { json: { refreshToken: store.refreshToken } })
+      .json<ApiSuccess<{ tokens: AuthTokens }>>();
 
     store.setTokens(res.data.tokens);
     return res.data.tokens;
-  })().finally(() => {
-    refreshPromise = null;
-  });
+  })().finally(() => { refreshPromise = null; });
 
   return refreshPromise;
 }
@@ -43,7 +35,7 @@ async function refreshTokens(): Promise<AuthTokens> {
 export const api: KyInstance = ky.create({
   prefix: BASE_URL,
   timeout: 30_000,
-  retry: { limit: 0 }, // we handle retries manually after token refresh
+  retry: { limit: 0 },
 
   hooks: {
     beforeRequest: [
@@ -57,7 +49,6 @@ export const api: KyInstance = ky.create({
 
     afterResponse: [
       async ({ request, response }) => {
-
         if (response.status === 403) {
           try {
             const body = await response.clone().json() as { error?: string };
@@ -69,7 +60,7 @@ export const api: KyInstance = ky.create({
               }
               return response;
             }
-          } catch { /* non-JSON 403 — fall through */ }
+          } catch { /* non-JSON 403 */ }
         }
 
         if (response.status !== 401) return response;
@@ -96,15 +87,12 @@ export const api: KyInstance = ky.create({
 
     beforeError: [
       async ({ error }) => {
-        // Check if the error has a response property (ky's HTTPError)
         if (error && typeof error === 'object' && 'response' in error) {
           const kyError = error as { response: Response; message: string };
           try {
             const body = await kyError.response.clone().json() as { error?: string };
             error.message = body.error ?? kyError.response.statusText;
-          } catch {
-            // non-JSON error body
-          }
+          } catch { /* non-JSON */ }
         }
         return error;
       },
@@ -112,11 +100,10 @@ export const api: KyInstance = ky.create({
   },
 });
 
-// ─── Typed helpers ─────────────────────────────────────────────────────────────
+// ─── Error helper ─────────────────────────────────────────────────────────────
 
-/** Extract the API error message from a ky HTTPError */
 export async function getApiError(err: unknown): Promise<string> {
-  if (err instanceof HTTPError) {  // ✅ Now works because HTTPError is imported as a value
+  if (err instanceof HTTPError) {
     try {
       const body = await err.response.clone().json() as { error?: string };
       return body.error ?? err.message;

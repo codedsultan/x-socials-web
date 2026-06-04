@@ -8,3 +8,4 @@ export default async function PostPage({
   const { id } = await params;
   return <PostDetailView key={id} id={id} />;
 }
+
