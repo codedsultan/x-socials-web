@@ -18,11 +18,9 @@ export type ApiResponse<T> = ApiSuccess<T> | ApiError;
 export interface PageMeta {
   limit: number;
   hasMore: boolean;
-  // Offset
   page?: number;
   total?: number;
   totalPages?: number;
-  // Cursor / Keyset
   nextCursor?: string | null;
   prevCursor?: string | null;
 }
@@ -42,7 +40,9 @@ export interface AuthTokens {
 
 export interface CurrentUser {
   id: string;
+  name?: string;     // added — backend returns name on login/register
   email: string;
+  emailVerifiedAt?: string | null;  // added — needed for verification banner
 }
 
 export interface AuthResponse {
@@ -66,6 +66,22 @@ export interface LoginDto {
   password: string;
 }
 
+// ─── New OTP/email DTOs ───────────────────────────────────────────────────────
+
+export interface RequestOtpDto {
+  email: string;
+}
+
+export interface VerifyEmailDto {
+  code: string;
+}
+
+export interface ResetPasswordDto {
+  email: string;
+  code: string;
+  newPassword: string;
+}
+
 // ─── User ─────────────────────────────────────────────────────────────────────
 
 export interface UserProfile {
@@ -73,6 +89,7 @@ export interface UserProfile {
   name?: string;
   email: string;
   suspended?: boolean;
+  emailVerifiedAt?: string | null;  // added
   createdAt?: string;
   followerCount?: number;
   followingCount?: number;

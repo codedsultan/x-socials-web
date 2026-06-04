@@ -14,7 +14,6 @@ import { useLogout } from '@/modules/auth/hooks/use-auth';
 import { useState } from 'react';
 import { CreatePostForm } from '@/modules/posts/components/create-post-form';
 
-
 const navItems = [
   { href: '/feed' as Route, icon: Home, label: 'Feed' },
   { href: '/search' as Route, icon: Search, label: 'Explore' },
@@ -26,6 +25,9 @@ export function Sidebar() {
   const user = useAuthStore((s) => s.user);
   const logout = useLogout();
   const [compose, setCompose] = useState(false);
+
+  // Show name if available, fall back to email
+  const displayName = user?.name ?? user?.email ?? '';
 
   return (
     <>
@@ -89,7 +91,6 @@ export function Sidebar() {
 
         {/* Footer */}
         <div className="border-t border-neutral-100 dark:border-neutral-800 pt-3 mt-1 space-y-1">
-
           <button
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
             className="flex items-center gap-3 w-full px-3 py-2 rounded-xl text-sm text-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all"
@@ -100,12 +101,16 @@ export function Sidebar() {
 
           {user ? (
             <div className="flex items-center gap-2 px-3 py-2">
-              <Avatar name={user.email} size="sm" />
+              <Avatar name={displayName} size="sm" />
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium text-neutral-700 dark:text-neutral-300 truncate">{user.email}</p>
+                {user.name && (
+                  <p className="text-xs font-semibold text-neutral-800 dark:text-neutral-200 truncate">{user.name}</p>
+                )}
+                <p className="text-xs text-neutral-500 dark:text-neutral-400 truncate">{user.email}</p>
               </div>
               <Button
-                variant="ghost" size="icon"
+                variant="ghost"
+                size="icon"
                 onClick={() => logout.mutate()}
                 aria-label="Logout"
                 className="text-neutral-400 hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
